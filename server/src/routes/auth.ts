@@ -44,14 +44,12 @@ router.post('/register', async (req, res) => {
       data: {
         email,
         password: hashedPassword,
-        name,
+        name: name || email.split('@')[0],
       },
     });
 
     // Generate JWT
-    const token = jwt.sign({ id: user.id }, env.JWT_SECRET, {
-      expiresIn: '7d',
-    });
+    const token = jwt.sign({ id: user.id }, env.JWT_SECRET, { expiresIn: '7d' });
 
     res.json({
       token,
@@ -63,7 +61,10 @@ router.post('/register', async (req, res) => {
     });
   } catch (error) {
     logger.error('Registration error:', error);
-    res.status(400).json({ error: 'Invalid input data' });
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ error: error.errors });
+    }
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -82,15 +83,13 @@ router.post('/login', async (req, res) => {
     }
 
     // Verify password
-    const isValid = await bcrypt.compare(password, user.password);
-    if (!isValid) {
+    const isValidPassword = await bcrypt.compare(password, user.password);
+    if (!isValidPassword) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
     // Generate JWT
-    const token = jwt.sign({ id: user.id }, env.JWT_SECRET, {
-      expiresIn: '7d',
-    });
+    const token = jwt.sign({ id: user.id }, env.JWT_SECRET, { expiresIn: '7d' });
 
     res.json({
       token,
@@ -102,55 +101,45 @@ router.post('/login', async (req, res) => {
     });
   } catch (error) {
     logger.error('Login error:', error);
-    res.status(400).json({ error: 'Invalid input data' });
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ error: error.errors });
+    }
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
-
-// Google OAuth routes
-router.get(
-  '/google',
-  passport.authenticate('google', {
-    scope: ['profile', 'email'],
-  })
-);
-
-router.get(
-  '/google/callback',
-  passport.authenticate('google', { session: false }),
-  (req, res) => {
-    const token = jwt.sign({ id: req.user!.id }, env.JWT_SECRET, {
-      expiresIn: '7d',
-    });
-    res.redirect(`${env.FRONTEND_URL}/auth/callback?token=${token}`);
-  }
-);
-
-// GitHub OAuth routes
-router.get(
-  '/github',
-  passport.authenticate('github', {
-    scope: ['user:email'],
-  })
-);
-
-router.get(
-  '/github/callback',
-  passport.authenticate('github', { session: false }),
-  (req, res) => {
-    const token = jwt.sign({ id: req.user!.id }, env.JWT_SECRET, {
-      expiresIn: '7d',
-    });
-    res.redirect(`${env.FRONTEND_URL}/auth/callback?token=${token}`);
-  }
-);
 
 // Get current user
 router.get(
   '/me',
   passport.authenticate('jwt', { session: false }),
-  async (req, res) => {
+  (req, res) => {
     res.json({ user: req.user });
   }
 );
+
+// OAuth routes - only add if credentials are configured
+if (env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET) {
+  router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+  router.get(
+    '/google/callback',
+    passport.authenticate('google', { session: false }),
+    (req, res) => {
+      const token = jwt.sign({ id: req.user.id }, env.JWT_SECRET, { expiresIn: '7d' });
+      res.redirect(`${env.FRONTEND_URL}/auth/callback?token=${token}`);
+    }
+  );
+}
+
+if (env.GITHUB_CLIENT_ID && env.GITHUB_CLIENT_SECRET) {
+  router.get('/github', passport.authenticate('github', { scope: ['user:email'] }));
+  router.get(
+    '/github/callback',
+    passport.authenticate('github', { session: false }),
+    (req, res) => {
+      const token = jwt.sign({ id: req.user.id }, env.JWT_SECRET, { expiresIn: '7d' });
+      res.redirect(`${env.FRONTEND_URL}/auth/callback?token=${token}`);
+    }
+  );
+}
 
 export default router;

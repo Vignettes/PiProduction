@@ -5,6 +5,7 @@ import { PrismaClient } from '@prisma/client';
 import env from './config/env';
 import logger from './config/logger';
 import './config/passport';
+import authRouter from './routes/auth';
 
 // Initialize Express app
 const app = express();
@@ -17,6 +18,9 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(passport.initialize());
+
+// Routes
+app.use('/api/auth', authRouter);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
