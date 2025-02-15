@@ -2,7 +2,10 @@ import passport from 'passport';
 import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import { Strategy as GitHubStrategy } from 'passport-github2';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, User } from '@prisma/client';
+import { VerifyCallback } from 'passport-oauth2';
+import { Profile as GoogleProfile } from 'passport-google-oauth20';
+import { Profile as GitHubProfile } from 'passport-github2';
 import env from './env';
 
 const prisma = new PrismaClient();
@@ -14,7 +17,7 @@ passport.use(
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       secretOrKey: env.JWT_SECRET,
     },
-    async (payload, done) => {
+    async (payload: { id: string }, done: VerifyCallback) => {
       try {
         const user = await prisma.user.findUnique({
           where: { id: payload.id },
@@ -24,7 +27,7 @@ passport.use(
         }
         return done(null, user);
       } catch (error) {
-        return done(error, false);
+        return done(error as Error);
       }
     }
   )
@@ -39,7 +42,12 @@ if (env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET) {
         clientSecret: env.GOOGLE_CLIENT_SECRET,
         callbackURL: `${env.FRONTEND_URL}/api/auth/google/callback`,
       },
-      async (accessToken, refreshToken, profile, done) => {
+      async (
+        accessToken: string,
+        refreshToken: string,
+        profile: GoogleProfile,
+        done: VerifyCallback
+      ) => {
         try {
           let user = await prisma.user.findUnique({
             where: { googleId: profile.id },
@@ -57,7 +65,7 @@ if (env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET) {
 
           return done(null, user);
         } catch (error) {
-          return done(error as Error, false);
+          return done(error as Error);
         }
       }
     )
@@ -72,7 +80,12 @@ if (env.GITHUB_CLIENT_ID && env.GITHUB_CLIENT_SECRET) {
         clientSecret: env.GITHUB_CLIENT_SECRET,
         callbackURL: `${env.FRONTEND_URL}/api/auth/github/callback`,
       },
-      async (accessToken, refreshToken, profile, done) => {
+      async (
+        accessToken: string,
+        refreshToken: string,
+        profile: GitHubProfile,
+        done: VerifyCallback
+      ) => {
         try {
           let user = await prisma.user.findUnique({
             where: { githubId: profile.id },
@@ -90,7 +103,7 @@ if (env.GITHUB_CLIENT_ID && env.GITHUB_CLIENT_SECRET) {
 
           return done(null, user);
         } catch (error) {
-          return done(error as Error, false);
+          return done(error as Error);
         }
       }
     )

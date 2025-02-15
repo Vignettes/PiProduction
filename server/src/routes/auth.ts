@@ -1,6 +1,6 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import passport from 'passport';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, User } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { z } from 'zod';
@@ -23,7 +23,7 @@ const loginSchema = z.object({
 });
 
 // Register new user
-router.post('/register', async (req, res) => {
+router.post('/register', async (req: Request, res: Response) => {
   try {
     const { email, password, name } = registerSchema.parse(req.body);
 
@@ -69,7 +69,7 @@ router.post('/register', async (req, res) => {
 });
 
 // Login user
-router.post('/login', async (req, res) => {
+router.post('/login', async (req: Request, res: Response) => {
   try {
     const { email, password } = loginSchema.parse(req.body);
 
@@ -112,7 +112,7 @@ router.post('/login', async (req, res) => {
 router.get(
   '/me',
   passport.authenticate('jwt', { session: false }),
-  (req, res) => {
+  (req: Request, res: Response) => {
     res.json({ user: req.user });
   }
 );
@@ -123,8 +123,9 @@ if (env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET) {
   router.get(
     '/google/callback',
     passport.authenticate('google', { session: false }),
-    (req, res) => {
-      const token = jwt.sign({ id: req.user.id }, env.JWT_SECRET, { expiresIn: '7d' });
+    (req: Request, res: Response) => {
+      const user = req.user as User;
+      const token = jwt.sign({ id: user.id }, env.JWT_SECRET, { expiresIn: '7d' });
       res.redirect(`${env.FRONTEND_URL}/auth/callback?token=${token}`);
     }
   );
@@ -135,8 +136,9 @@ if (env.GITHUB_CLIENT_ID && env.GITHUB_CLIENT_SECRET) {
   router.get(
     '/github/callback',
     passport.authenticate('github', { session: false }),
-    (req, res) => {
-      const token = jwt.sign({ id: req.user.id }, env.JWT_SECRET, { expiresIn: '7d' });
+    (req: Request, res: Response) => {
+      const user = req.user as User;
+      const token = jwt.sign({ id: user.id }, env.JWT_SECRET, { expiresIn: '7d' });
       res.redirect(`${env.FRONTEND_URL}/auth/callback?token=${token}`);
     }
   );
