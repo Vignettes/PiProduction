@@ -1,0 +1,16 @@
+{
+  "name": "chordbreak",
+  "version": "1.0.0",
+  "description": "ChordBreak - Learn Guitar Your Way",
+  "scripts": {
+    "start": "concurrently \"npm run start:frontend\" \"npm run start:backend\"",
+    "start:frontend": "cd learn-guitar && npm run dev",
+    "start:backend": "cd server && npm run dev",
+    "stop": "kill-port 3001 3005",
+    "dev": "npm run stop || true && npm run start"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "kill-port": "^2.0.1"
+  }
+}

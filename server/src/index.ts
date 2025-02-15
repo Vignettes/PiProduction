@@ -1,12 +1,14 @@
 import express from 'express';
 import cors from 'cors';
 import passport from 'passport';
+import path from 'path';
 import { PrismaClient } from '@prisma/client';
 import env from './config/env';
 import logger from './config/logger';
 import './config/passport';
 import authRouter from './routes/auth';
 import uploadRouter from './routes/upload';
+import songsRouter from './routes/songs';
 
 // Initialize Express app
 const app = express();
@@ -17,16 +19,21 @@ app.options('*', cors());
 
 // CORS configuration
 const corsOptions = {
-  origin: '*', // Temporarily allow all origins for debugging
+  origin: true, // Allow all origins in development
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Origin', 'X-Requested-With'],
+  exposedHeaders: ['Content-Range', 'X-Content-Range'],
+  maxAge: 600, // Cache preflight requests for 10 minutes
 };
 
 // Middleware
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(passport.initialize());
+
+// Serve static files from uploads directory
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Request logging
 app.use((req, res, next) => {
@@ -42,6 +49,7 @@ app.use((req, res, next) => {
 // Routes
 app.use('/api/auth', authRouter);
 app.use('/api/upload', uploadRouter);
+app.use('/api/songs', songsRouter);
 
 // Health check endpoint
 app.get('/health', (req, res) => {

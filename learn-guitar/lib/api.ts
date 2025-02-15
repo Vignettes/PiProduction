@@ -11,7 +11,9 @@ export async function register(data: { email: string; password: string; name?: s
     headers: {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
+      'Origin': window.location.origin,
     },
+    credentials: 'include',
     body: JSON.stringify(data),
   });
 
@@ -48,7 +50,9 @@ export async function login(data: { email: string; password: string }) {
     headers: {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
+      'Origin': window.location.origin,
     },
+    credentials: 'include',
     body: JSON.stringify(data),
   });
 
@@ -81,29 +85,22 @@ export async function getCurrentUser(token: string) {
   console.log('Token:', token);
   
   const response = await fetch(url, {
+    method: 'GET',
     headers: {
       'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
       'Accept': 'application/json',
+      'Origin': window.location.origin,
     },
+    credentials: 'include',
   });
 
   console.log('Response status:', response.status);
   console.log('Response headers:', Object.fromEntries(response.headers.entries()));
 
-  let responseData;
-  try {
-    const text = await response.text();
-    console.log('Raw response:', text);
-    responseData = text ? JSON.parse(text) : null;
-  } catch (error) {
-    console.error('Failed to parse response:', error);
-    throw new Error('Server response was not valid JSON');
-  }
-
   if (!response.ok) {
     throw new Error('Failed to get current user');
   }
 
-  console.log('Get current user successful:', responseData);
-  return responseData;
+  return response.json();
 }

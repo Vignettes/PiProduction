@@ -1,9 +1,9 @@
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 import logger from '../config/logger';
-import { authenticateToken } from '../middleware/auth';
+import { authenticateToken, JwtPayload } from '../middleware/auth';
 
 const router = express.Router();
 
@@ -25,7 +25,7 @@ const storage = multer.diskStorage({
 });
 
 // File filter to accept only audio files
-const fileFilter = (req: express.Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+const fileFilter = (req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
   const allowedMimeTypes = ['audio/mpeg', 'audio/wav', 'audio/mp3'];
   if (allowedMimeTypes.includes(file.mimetype)) {
     cb(null, true);
@@ -43,30 +43,40 @@ const upload = multer({
 });
 
 // Upload endpoint
-router.post('/', authenticateToken, upload.single('audio'), (req, res) => {
+const handleUpload = async (req: Request, res: Response) => {
   try {
-    if (!req.file) {
+    const file = (req as any).file;
+    const user = (req as any).user;
+
+    if (!file) {
       return res.status(400).json({ error: 'No file uploaded' });
     }
 
+    if (!user) {
+      return res.status(401).json({ error: 'User not authenticated' });
+    }
+
     logger.info('File uploaded successfully', {
-      filename: req.file.filename,
-      size: req.file.size,
-      mimetype: req.file.mimetype
+      filename: file.filename,
+      size: file.size,
+      mimetype: file.mimetype,
+      userId: user.userId
     });
 
-    res.json({
+    return res.json({
       message: 'File uploaded successfully',
       file: {
-        filename: req.file.filename,
-        size: req.file.size,
-        mimetype: req.file.mimetype
+        filename: file.filename,
+        size: file.size,
+        mimetype: file.mimetype
       }
     });
   } catch (error: any) {
     logger.error('Error uploading file:', error);
-    res.status(500).json({ error: error.message || 'Error uploading file' });
+    return res.status(500).json({ error: error.message || 'Error uploading file' });
   }
-});
+};
+
+router.post('/', authenticateToken, upload.single('audio'), handleUpload);
 
 export default router;
