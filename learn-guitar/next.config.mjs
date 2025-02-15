@@ -23,13 +23,13 @@ const nextConfig = {
   },
   env: {
     BACKEND_URL: 'http://localhost:3001',
-    NEXT_PUBLIC_API_URL: 'http://localhost:3001/api',
+    NEXT_PUBLIC_API_URL: 'http://localhost:3005/api',
   },
   async rewrites() {
     return [
       {
         source: '/api/:path*',
-        destination: 'http://localhost:3001/api/:path*',
+        destination: 'http://localhost:3005/api/:path*',
       },
     ]
   },

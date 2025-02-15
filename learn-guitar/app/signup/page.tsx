@@ -23,8 +23,10 @@ export default function SignUpPage() {
     const password = formData.get('password') as string;
     const name = formData.get('name') as string;
 
+    console.log('Form submitted with values:', { email, name });
+    console.log('API URL:', process.env.NEXT_PUBLIC_API_URL);
+
     try {
-      console.log('Submitting registration form:', { email, name });
       const response = await register({ email, password, name });
       console.log('Registration successful:', response);
       

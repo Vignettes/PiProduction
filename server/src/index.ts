@@ -6,6 +6,7 @@ import env from './config/env';
 import logger from './config/logger';
 import './config/passport';
 import authRouter from './routes/auth';
+import uploadRouter from './routes/upload';
 
 // Initialize Express app
 const app = express();
@@ -40,6 +41,7 @@ app.use((req, res, next) => {
 
 // Routes
 app.use('/api/auth', authRouter);
+app.use('/api/upload', uploadRouter);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -55,7 +57,7 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
 });
 
 // Start server
-const PORT = env.PORT || 3001;
+const PORT = env.PORT || 3005;
 app.listen(PORT, () => {
   logger.info(`Server running on port ${PORT}`);
 });
