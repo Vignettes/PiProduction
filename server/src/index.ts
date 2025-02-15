@@ -13,8 +13,10 @@ const prisma = new PrismaClient();
 
 // Middleware
 app.use(cors({
-  origin: env.FRONTEND_URL,
+  origin: ['http://localhost:3000', env.FRONTEND_URL],
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 app.use(express.json());
 app.use(passport.initialize());

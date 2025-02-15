@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { Upload } from "lucide-react"
+import { Upload, CheckCircle, Share2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
@@ -10,7 +10,7 @@ export default function Home() {
         <nav className="flex items-center justify-between mb-12">
           <div className="flex items-center gap-2">
             <img
-              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/favicon-32-LETsI2uVZ3faGBOx1ZAF54tQHpTlrE.png"
+              src="/logo.svg"
               alt="Guitar Learning Logo"
               className="w-10 h-10"
             />
@@ -44,8 +44,8 @@ export default function Home() {
                 <CardTitle>1. Upload</CardTitle>
                 <CardDescription>Share your song and we'll analyze it</CardDescription>
               </CardHeader>
-              <CardContent>
-                <Upload className="w-12 h-12 mx-auto text-cyan-600" />
+              <CardContent className="flex justify-center">
+                <Upload className="w-12 h-12 text-cyan-600" />
               </CardContent>
             </Card>
 
@@ -54,7 +54,9 @@ export default function Home() {
                 <CardTitle>2. Learn</CardTitle>
                 <CardDescription>Follow your personalized learning plan</CardDescription>
               </CardHeader>
-              <CardContent className="text-center text-4xl">🎸</CardContent>
+              <CardContent className="flex justify-center">
+                <CheckCircle className="w-12 h-12 text-cyan-600" />
+              </CardContent>
             </Card>
 
             <Card>
@@ -62,53 +64,71 @@ export default function Home() {
                 <CardTitle>3. Share & Save</CardTitle>
                 <CardDescription>Show off your skills and pay less</CardDescription>
               </CardHeader>
-              <CardContent className="text-center text-4xl">🎥</CardContent>
+              <CardContent className="flex justify-center">
+                <Share2 className="w-12 h-12 text-cyan-600" />
+              </CardContent>
             </Card>
           </div>
 
-          <div className="text-center">
-            <Link href="/upload">
-              <Button size="lg" className="bg-cyan-600 hover:bg-cyan-700">
+          <div className="text-center space-y-6">
+            <Button size="lg" asChild>
+              <Link href="/upload" className="text-lg px-8">
                 Start Learning Now
-                <Upload className="w-4 h-4 ml-2" />
-              </Button>
-            </Link>
-          </div>
+              </Link>
+            </Button>
 
-          <div className="grid gap-8 mt-20 md:grid-cols-2 max-w-4xl mx-auto">
-            <Card>
-              <CardHeader>
-                <CardTitle>Pay 50% Upfront</CardTitle>
-                <CardDescription>Get your personalized learning plan immediately</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2 text-sm">
-                  <li className="flex items-center">✓ Chord breakdown</li>
-                  <li className="flex items-center">✓ Section-by-section guide</li>
-                  <li className="flex items-center">✓ Practice schedule</li>
-                  <li className="flex items-center">✓ Progress tracking</li>
-                </ul>
-              </CardContent>
-            </Card>
+            <div className="space-y-4 max-w-2xl mx-auto">
+              <h2 className="text-2xl font-semibold">Pay 50% Upfront</h2>
+              <p className="text-gray-500">
+                Get your personalized learning plan immediately
+              </p>
+              <ul className="space-y-2 text-left max-w-md mx-auto">
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="w-5 h-5 text-cyan-600" />
+                  <span>Chord breakdown</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="w-5 h-5 text-cyan-600" />
+                  <span>Section-by-section guide</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="w-5 h-5 text-cyan-600" />
+                  <span>Practice schedule</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="w-5 h-5 text-cyan-600" />
+                  <span>Progress tracking</span>
+                </li>
+              </ul>
+            </div>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Share Your Success</CardTitle>
-                <CardDescription>Post a video playing the song within 30 days</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2 text-sm">
-                  <li className="flex items-center">✓ Skip the final payment</li>
-                  <li className="flex items-center">✓ Join our wall of fame</li>
-                  <li className="flex items-center">✓ Inspire other learners</li>
-                  <li className="flex items-center">✓ Build your portfolio</li>
-                </ul>
-              </CardContent>
-            </Card>
+            <div className="space-y-4 max-w-2xl mx-auto pt-8">
+              <h2 className="text-2xl font-semibold">Share Your Success</h2>
+              <p className="text-gray-500">
+                Post a video playing the song within 30 days
+              </p>
+              <ul className="space-y-2 text-left max-w-md mx-auto">
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="w-5 h-5 text-cyan-600" />
+                  <span>Skip the final payment</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="w-5 h-5 text-cyan-600" />
+                  <span>Join our wall of fame</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="w-5 h-5 text-cyan-600" />
+                  <span>Inspire other learners</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="w-5 h-5 text-cyan-600" />
+                  <span>Build your portfolio</span>
+                </li>
+              </ul>
+            </div>
           </div>
         </main>
       </div>
     </div>
   )
 }
-
