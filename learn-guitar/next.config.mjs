@@ -21,6 +21,18 @@ const nextConfig = {
     parallelServerBuildTraces: true,
     parallelServerCompiles: true,
   },
+  env: {
+    BACKEND_URL: 'http://localhost:3001',
+    NEXT_PUBLIC_API_URL: 'http://localhost:3001/api',
+  },
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: 'http://localhost:3001/api/:path*',
+      },
+    ]
+  },
 }
 
 mergeConfig(nextConfig, userConfig)

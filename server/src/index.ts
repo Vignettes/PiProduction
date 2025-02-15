@@ -11,15 +11,32 @@ import authRouter from './routes/auth';
 const app = express();
 const prisma = new PrismaClient();
 
-// Middleware
-app.use(cors({
-  origin: ['http://localhost:3000', env.FRONTEND_URL],
+// Handle preflight requests
+app.options('*', cors());
+
+// CORS configuration
+const corsOptions = {
+  origin: '*', // Temporarily allow all origins for debugging
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-}));
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+};
+
+// Middleware
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(passport.initialize());
+
+// Request logging
+app.use((req, res, next) => {
+  logger.info('Incoming request:', {
+    method: req.method,
+    path: req.path,
+    origin: req.headers.origin,
+    headers: req.headers,
+  });
+  next();
+});
 
 // Routes
 app.use('/api/auth', authRouter);
@@ -30,16 +47,15 @@ app.get('/health', (req, res) => {
 });
 
 // Error handling middleware
-app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  logger.error(err.stack);
-  res.status(500).json({
-    error: 'Internal Server Error',
-    message: env.NODE_ENV === 'development' ? err.message : undefined,
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  logger.error('Server error:', err);
+  res.status(err.status || 500).json({
+    error: err.message || 'Internal server error',
   });
 });
 
 // Start server
-const port = parseInt(env.PORT, 10);
-app.listen(port, () => {
-  logger.info(`Server running on port ${port}`);
+const PORT = env.PORT || 3001;
+app.listen(PORT, () => {
+  logger.info(`Server running on port ${PORT}`);
 });

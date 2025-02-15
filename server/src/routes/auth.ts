@@ -25,7 +25,10 @@ const loginSchema = z.object({
 // Register new user
 router.post('/register', async (req: Request, res: Response) => {
   try {
+    logger.info('Registration attempt:', { email: req.body.email });
+    
     const { email, password, name } = registerSchema.parse(req.body);
+    logger.info('Validation passed');
 
     // Check if user exists
     const existingUser = await prisma.user.findUnique({
@@ -33,11 +36,13 @@ router.post('/register', async (req: Request, res: Response) => {
     });
 
     if (existingUser) {
+      logger.info('User already exists:', { email });
       return res.status(400).json({ error: 'Email already registered' });
     }
 
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
+    logger.info('Password hashed');
 
     // Create user
     const user = await prisma.user.create({
@@ -47,11 +52,17 @@ router.post('/register', async (req: Request, res: Response) => {
         name: name || email.split('@')[0],
       },
     });
+    logger.info('User created successfully:', { userId: user.id });
 
     // Generate JWT
-    const token = jwt.sign({ id: user.id }, env.JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign(
+      { userId: user.id, email: user.email },
+      env.JWT_SECRET,
+      { expiresIn: '24h' }
+    );
+    logger.info('JWT generated');
 
-    res.json({
+    res.status(201).json({
       token,
       user: {
         id: user.id,
@@ -62,7 +73,7 @@ router.post('/register', async (req: Request, res: Response) => {
   } catch (error) {
     logger.error('Registration error:', error);
     if (error instanceof z.ZodError) {
-      return res.status(400).json({ error: error.errors });
+      return res.status(400).json({ error: 'Invalid input data', details: error.errors });
     }
     res.status(500).json({ error: 'Internal server error' });
   }

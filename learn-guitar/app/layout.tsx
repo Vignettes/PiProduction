@@ -7,17 +7,18 @@ const inter = Inter({ subsets: ['latin'] })
 export const metadata: Metadata = {
   title: 'SongMaster - Learn Any Song',
   description: 'Master any song with personalized learning plans',
-  generator: 'Next.js',
 }
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode
-}>) {
+}) {
   return (
-    <html lang="en">
-      <body className={inter.className}>{children}</body>
+    <html lang="en" className={inter.className}>
+      <body className="min-h-screen bg-background antialiased">
+        {children}
+      </body>
     </html>
   )
 }

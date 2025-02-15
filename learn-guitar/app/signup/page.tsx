@@ -24,13 +24,17 @@ export default function SignUpPage() {
     const name = formData.get('name') as string;
 
     try {
+      console.log('Submitting registration form:', { email, name });
       const response = await register({ email, password, name });
+      console.log('Registration successful:', response);
+      
       // Store the token
       localStorage.setItem('token', response.token);
       // Redirect to dashboard or home
       router.push('/');
-    } catch (error) {
-      setError('Registration failed. Please try again.');
+    } catch (error: any) {
+      console.error('Registration error:', error);
+      setError(error.message || 'Registration failed. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -53,8 +57,8 @@ export default function SignUpPage() {
                 id="name"
                 name="name"
                 type="text"
-                placeholder="Enter your name"
                 required
+                placeholder="Enter your name"
               />
             </div>
             <div className="space-y-2">
@@ -65,8 +69,8 @@ export default function SignUpPage() {
                 id="email"
                 name="email"
                 type="email"
-                placeholder="Enter your email"
                 required
+                placeholder="Enter your email"
               />
             </div>
             <div className="space-y-2">
@@ -77,15 +81,25 @@ export default function SignUpPage() {
                 id="password"
                 name="password"
                 type="password"
-                placeholder="Create a password"
                 required
+                placeholder="Create a password"
+                minLength={8}
               />
+              <p className="text-xs text-gray-500">
+                Password must be at least 8 characters long
+              </p>
             </div>
-            {error && <p className="text-sm text-red-500">{error}</p>}
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Creating account...' : 'Sign Up'}
+            {error && (
+              <div className="text-red-500 text-sm mt-2">{error}</div>
+            )}
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={loading}
+            >
+              {loading ? 'Creating Account...' : 'Create Account'}
             </Button>
-            <p className="text-sm text-center text-gray-500">
+            <p className="text-center text-sm text-gray-500">
               Already have an account?{' '}
               <Link href="/login" className="text-cyan-600 hover:underline">
                 Log in
